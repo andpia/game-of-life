@@ -21,10 +21,23 @@ header {
   border: 1px solid #999;
   background: white;
   cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.cell.is-dead {
+  background: white;
+}
+
+.cell.is-nascent {
+  background: #b2b1b1;
 }
 
 .cell.is-alive {
-  background: #222;
+  background: #1f7a1f;
+}
+
+.cell:hover {
+  transform: scale(1.03);
 }
 
 .cell:focus-visible {
