@@ -1,0 +1,33 @@
+body {
+  font-family: system-ui, sans-serif;
+  padding: 1rem;
+}
+
+header {
+  margin-bottom: 1rem;
+}
+
+.grid {
+  width: min(90vw, 420px);
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+}
+
+.cell {
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid #999;
+  background: white;
+  cursor: pointer;
+}
+
+.cell.is-alive {
+  background: #222;
+}
+
+.cell:focus-visible {
+  outline: 2px solid #06c;
+  outline-offset: -2px;
+}
