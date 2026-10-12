@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conway's Game of Life</title>
+  <link rel="stylesheet" href="game_of_life.css">
+  <link rel="stylesheet" href="manual_grid.css">
+</head>
+<body>
+  <header class="page-header">
+    <h1>Conway's Game of Life</h1>
+  </header>
+  <main class="layout">
+    <section id="rules-section" class="rules-section" aria-labelledby="rules-title">
+      <h2 id="rules-title">Rules</h2>
+      <p>
+        The universe of the Game of Life is an infinite, two-dimensional
+        orthogonal grid of square cells, each of which is in one of two possible
+        states, <span class="live">live</span> or <span class="dead">dead</span>.
+        <br>Every cell interacts with its eight neighbours,
+        which are the cells that are horizontally, vertically, or diagonally
+        adjacent.
+      </p>
+      <p>At each step in time (tick), the following transitions occur:</p>
+      <ul>
+        <li>
+          Any <span class="live">live</span> cell with fewer than two live neighbours <span class="dead">dies</span>
+          (underpopulation).
+        </li>
+        <li>
+          Any <span class="live">live</span> cell with two or three live neighbours <span class="live">lives</span> on to the next
+          generation (survival).
+        </li>
+        <li>
+          Any <span class="live">live</span> cell with more than three live neighbours <span class="dead">dies</span>
+          (overpopulation).
+        </li>
+        <li>
+          Any <span class="dead">dead</span> cell with exactly three live neighbours becomes a <span class="live">live</span> cell
+          (reproduction).
+        </li>
+      </ul>
+      <p>
+        The initial pattern constitutes the seed of the system, from which all
+        subsequent generations evolve according to the rules described above.
+      </p>
+    </section>
+    <section id="manual-grid-section" class="manual-grid-section" aria-labelledby="manual-grid-title">
+      <h2 id="manual-grid-title">Universe Grid (manual mode)</h2>
+      <div id="manual-grid" class="manual-grid" aria-label="manual-grid"></div>
+    </section>
+  </main>
+  <script src="manual_grid.js"></script>
+</body>
+</html>

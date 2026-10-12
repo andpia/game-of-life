@@ -1,0 +1,18 @@
+body {
+  font-family: system-ui, sans-serif;
+  padding: 1rem;
+}
+
+header {
+  margin-bottom: 1rem;
+}
+
+.rules-section .dead {
+  color: #d62828;
+  font-weight: bold;
+}
+
+.rules-section .live {
+  color: #2e8b57;
+  font-weight: bold;
+}
