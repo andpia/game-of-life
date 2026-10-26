@@ -1,56 +1,35 @@
-const grid = document.getElementById('grid');
+// Number of pixels per row and column (grid size)
+const N = 50;
 
-const CELL_STATES = {
-  DEAD: 0,
-  NASCENT: 1,
-  ALIVE: 2,
-};
+// Maximum size of each pixel in the grid (in pixels)
+const PIXEL_SIZE = 10;
+const GAP_SIZE = 1;
 
-const getNextState = (state) => {
-  if (state === CELL_STATES.DEAD) return CELL_STATES.NASCENT;
-  if (state === CELL_STATES.NASCENT) return CELL_STATES.ALIVE;
-  return CELL_STATES.DEAD;
-};
+// Get board element from the DOM
+const board = document.querySelector("#board");
+const resetButton = document.querySelector("#reset-button");
 
-const updateCellState = (cell, state) => {
-  cell.dataset.state = String(state);
-  cell.classList.remove('is-dead', 'is-nascent', 'is-alive');
+// Set the responsive board size and grid tracks
+board.style.setProperty("--board-max-size", `${N * PIXEL_SIZE + (N - 1) * GAP_SIZE}px`);
+board.style.setProperty("--pixel-gap", `${GAP_SIZE}px`);
+board.style.gridTemplateColumns = `repeat(${N}, minmax(0, 1fr))`;
+board.style.gridTemplateRows = `repeat(${N}, minmax(0, 1fr))`;
 
-  if (state === CELL_STATES.NASCENT) {
-    cell.classList.add('is-nascent');
-  } else if (state === CELL_STATES.ALIVE) {
-    cell.classList.add('is-alive');
-  } else {
-    cell.classList.add('is-dead');
-  }
-
-  const stateName = {
-    [CELL_STATES.DEAD]: 'dead',
-    [CELL_STATES.NASCENT]: 'nascent',
-    [CELL_STATES.ALIVE]: 'alive',
-  }[state];
-  cell.setAttribute('aria-label', `cell [${cell.dataset.row + 1}, ${cell.dataset.col + 1}], state ${stateName}`);
-  cell.setAttribute('aria-pressed', String(state === CELL_STATES.ALIVE || state === CELL_STATES.NASCENT));
-};
-
-if (grid) {
-  for (let row = 0; row < 10; row += 1) {
-    for (let col = 0; col < 10; col += 1) {
-      const cell = document.createElement('button');
-      cell.type = 'button';
-      cell.className = 'cell is-dead';
-      cell.dataset.row = String(row);
-      cell.dataset.col = String(col);
-      cell.dataset.state = String(CELL_STATES.DEAD);
-      updateCellState(cell, CELL_STATES.DEAD);
-
-      cell.addEventListener('click', () => {
-        const currentState = Number(cell.dataset.state || CELL_STATES.DEAD);
-        const nextState = getNextState(currentState);
-        updateCellState(cell, nextState);
-      });
-
-      grid.appendChild(cell);
-    }
-  }
+// Create the grid of pixels and add click event listeners to toggle their state
+for (let row = 0; row < N; row++) {
+	for (let column = 0; column < N; column++) {
+		const pixel = document.createElement("div");
+		pixel.className = "pixel";
+		pixel.addEventListener("click", () => {
+			pixel.classList.toggle("is-alive");
+		});
+		board.append(pixel);
+	}
 }
+
+// Add event listener to the reset button to clear all alive pixels
+resetButton.addEventListener("click", () => {
+	board.querySelectorAll(".pixel.is-alive").forEach((pixel) => {
+		pixel.classList.remove("is-alive");
+	});
+});

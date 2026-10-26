@@ -1,56 +1,15 @@
-body {
-  font-family: system-ui, sans-serif;
-  padding: 1rem;
+.board {
+	display: grid;
+	width: min(100%, var(--board-max-size));    /* Set the board width to be responsive with a maximum size */
+	aspect-ratio: 1;
+	gap: var(--pixel-gap);
 }
 
-header {
-  margin-bottom: 1rem;
+.pixel {
+	background-color: #f5f5f5;
+	cursor: pointer;
 }
 
-.grid {
-  width: min(90vw, 420px);
-  aspect-ratio: 1;
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-}
-
-.cell {
-  min-width: 0;
-  aspect-ratio: 1;
-  padding: 0;
-  border: 1px solid #999;
-  background: white;
-  cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.15s ease;
-}
-
-.cell.is-dead {
-  background: white;
-}
-
-.cell.is-nascent {
-  background: #b2b1b1;
-}
-
-.cell.is-alive {
-  background: #1f7a1f;
-}
-
-.cell:hover {
-  transform: scale(1.03);
-}
-
-.cell:focus-visible {
-  outline: 2px solid #06c;
-  outline-offset: -2px;
-}
-
-.rules-section .dead {
-  color: #d62828;
-  font-weight: bold;
-}
-
-.rules-section .live {
-  color: #2e8b57;
-  font-weight: bold;
+.pixel.is-alive {
+	background-color: #666666;
 }
