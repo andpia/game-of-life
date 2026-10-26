@@ -7,6 +7,7 @@ const GAP_SIZE = 1;
 
 // Get board element from the DOM
 const board = document.querySelector("#board");
+const startButton = document.querySelector("#start-button");
 const resetButton = document.querySelector("#reset-button");
 
 // Set the responsive board size and grid tracks
@@ -33,3 +34,10 @@ resetButton.addEventListener("click", () => {
 		pixel.classList.remove("is-alive");
 	});
 });
+
+// Function to start the Game of Life simulation
+function start() {
+}
+
+// Add event listener to the start button to begin the simulation
+startButton.addEventListener("click", start);
