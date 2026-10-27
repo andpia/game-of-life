@@ -14,9 +14,14 @@ const GAP_SIZE = 1;
 /*
  * DOM references
  */
-const board = document.querySelector("#board");
-const resetButton = document.querySelector("#reset-button");
+const startButton = document.querySelector("#start-button");
+const stopButton = document.querySelector("#stop-button");
 const stepButton = document.querySelector("#step-button");
+const resetButton = document.querySelector("#reset-button");
+const board = document.querySelector("#board");
+
+// Interval ID for the simulation loop (null if not running)
+let intervalId = null;
 
 
 /*
@@ -79,40 +84,9 @@ function reset() {
 	});
 }
 
-// Toggle the clicked cell. A single listener on the board handles all cells
-// (event delegation) instead of attaching N*N separate listeners.
-function handleBoardClick(event) {
-	const pixel = event.target.closest(".pixel");
-	if (!pixel) return; // click on a gap, not on a cell
-
-    // toggle the clicked cell's state
-	const index = Number(pixel.dataset.index);
-	setCellState(index, !cellStates[index]);
-}
-
-
 /*
  * Game of Life rules
  */
-
-// Advance the simulation by one generation
-function step() {
-	// Compute the whole next generation from the current one *before* changing anything,
-	// otherwise updated cells would affect their neighbors' counts in the same step
-	const nextCellStates = cellStates.map((alive, index) => {
-		const row = Math.floor(index / N);
-		const column = index % N;
-		const neighbors = countAliveNeighbors(row, column);
-
-		// A live cell survives with two or three neighbors; a dead cell is born with three
-		return neighbors === 3 || (alive && neighbors === 2);
-	});
-
-	// Touch the DOM only for cells whose state actually changed
-	nextCellStates.forEach((alive, index) => {
-		if (alive !== cellStates[index]) setCellState(index, alive);
-	});
-}
 
 // Count the live cells among the 8 surrounding ones.
 // Edges are not wrapped: cells outside the board count as dead.
@@ -136,12 +110,84 @@ function countAliveNeighbors(row, column) {
 	return count;
 }
 
+// Advance the simulation by one generation
+function step() {
+	// Compute the whole next generation from the current one *before* changing anything,
+	// otherwise updated cells would affect their neighbors' counts in the same step
+	const nextCellStates = cellStates.map((alive, index) => {
+		const row = Math.floor(index / N);
+		const column = index % N;
+		const neighbors = countAliveNeighbors(row, column);
+
+		// A live cell survives with two or three neighbors; a dead cell is born with three
+		return neighbors === 3 || (alive && neighbors === 2);
+	});
+
+	// Touch the DOM only for cells whose state actually changed
+	nextCellStates.forEach((alive, index) => {
+		if (alive !== cellStates[index]) setCellState(index, alive);
+	});
+}
 
 /*
- * Start
+ * Simulation controls
+ */
+
+// Start the simulation loop
+function start() {
+    intervalId = setInterval(step, 100);
+}
+
+// Stop the simulation loop
+function stop() {
+    clearInterval(intervalId);
+    intervalId = null;
+}
+
+/*
+ * Event handlers
+ */
+
+// Toggle the clicked cell. A single listener on the board handles all cells
+// (event delegation) instead of attaching N*N separate listeners.
+function handleBoardClick(event) {
+	const pixel = event.target.closest(".pixel");
+	if (!pixel) return; // click on a gap, not on a cell
+
+    // toggle the clicked cell's state
+	const index = Number(pixel.dataset.index);
+	setCellState(index, !cellStates[index]);
+}
+
+function handleStepClick() {
+    if (intervalId !== null) return;
+    step();
+}
+
+function handleResetClick() {
+    if (intervalId !== null) {
+        stop();
+    }
+    reset();
+}
+
+function handleStartClick() {
+    if (intervalId !== null) return;
+    start();
+}
+
+function handleStopClick() {
+    if (intervalId === null) return;
+    stop();
+}
+
+/*
+ * Initialize
  */
 initializeGrid();
 
+stepButton.addEventListener("click", handleStepClick);
+resetButton.addEventListener("click", handleResetClick);
+startButton.addEventListener("click", handleStartClick);
+stopButton.addEventListener("click", handleStopClick);
 board.addEventListener("click", handleBoardClick);
-stepButton.addEventListener("click", step);
-resetButton.addEventListener("click", reset);
