@@ -26,10 +26,10 @@ const stepButton = document.querySelector("#step-button");
  * (true = alive), indexed as row * N + column.
  * The DOM only *reflects* this state and is never read to compute the game.
  */
-const grid = new Array(N * N).fill(false);
+const cellStates = new Array(N * N).fill(false);
 
-// DOM elements for each cell, using the same indexing as `grid`
-const cells = [];
+// DOM elements for each cell, using the same indexing as `cellState`
+const cellElements = [];
 
 // Convert (row, column) coordinates into an index of the flat arrays
 const indexOf = (row, column) => row * N + column;
@@ -54,7 +54,7 @@ function initializeGrid() {
 		pixel.className = "pixel";
 		// Store the index so the click handler knows which cell was clicked
 		pixel.dataset.index = index;
-		cells.push(pixel);
+		cellElements.push(pixel);
 		fragment.append(pixel);
 	}
 
@@ -68,13 +68,13 @@ function initializeGrid() {
  */
 
 function setCellState(index, alive) {
-	grid[index] = alive;
-	cells[index].classList.toggle("is-alive", alive);
+	cellStates[index] = alive;
+	cellElements[index].classList.toggle("is-alive", alive);
 }
 
 // Kill every cell
 function reset() {
-	grid.forEach((alive, index) => {
+	cellStates.forEach((alive, index) => {
 		if (alive) setCellState(index, false);
 	});
 }
@@ -85,8 +85,9 @@ function handleBoardClick(event) {
 	const pixel = event.target.closest(".pixel");
 	if (!pixel) return; // click on a gap, not on a cell
 
+    // toggle the clicked cell's state
 	const index = Number(pixel.dataset.index);
-	setCellState(index, !grid[index]);
+	setCellState(index, !cellStates[index]);
 }
 
 
@@ -98,7 +99,7 @@ function handleBoardClick(event) {
 function step() {
 	// Compute the whole next generation from the current one *before* changing anything,
 	// otherwise updated cells would affect their neighbors' counts in the same step
-	const nextGrid = grid.map((alive, index) => {
+	const nextCellStates = cellStates.map((alive, index) => {
 		const row = Math.floor(index / N);
 		const column = index % N;
 		const neighbors = countAliveNeighbors(row, column);
@@ -108,8 +109,8 @@ function step() {
 	});
 
 	// Touch the DOM only for cells whose state actually changed
-	nextGrid.forEach((alive, index) => {
-		if (alive !== grid[index]) setCellState(index, alive);
+	nextCellStates.forEach((alive, index) => {
+		if (alive !== cellStates[index]) setCellState(index, alive);
 	});
 }
 
@@ -124,11 +125,11 @@ function countAliveNeighbors(row, column) {
 
 			const neighborRow = row + rowOffset;
 			const neighborColumn = column + columnOffset;
-			const isInside =
+			const isValidNeighbor =
 				neighborRow >= 0 && neighborRow < N &&
 				neighborColumn >= 0 && neighborColumn < N;
 
-			if (isInside && grid[indexOf(neighborRow, neighborColumn)]) count++;
+			if (isValidNeighbor && cellStates[indexOf(neighborRow, neighborColumn)]) count++;
 		}
 	}
 
