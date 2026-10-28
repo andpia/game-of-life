@@ -14,3 +14,11 @@
 .pixel.is-alive {
 	background-color: #666666;
 }
+
+.pixel.is-born {
+	background-color: #00ff00;
+}
+
+.pixel.is-died {
+	background-color: #ff0000;
+}
