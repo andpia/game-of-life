@@ -21,20 +21,18 @@ const resetButton = document.querySelector("#reset-button");
 const board = document.querySelector("#board");
 
 // Interval ID for the simulation loop (null if not running)
-let intervalId = null;
+let runIntervalId = null;
 
 
 /*
  * State
  *
  * The grid state is the single source of truth: a flat array of booleans
- * (true = alive), indexed as row * N + column.
- * The DOM only *reflects* this state and is never read to compute the game.
+ * (true = alive), indexed as 'row * N + column'.
+ * The DOM only reflects this state and is never read to compute the game.
  */
 const cellStates = new Array(N * N).fill(false);
-
-// DOM elements for each cell, using the same indexing as `cellState`
-const cellElements = [];
+const cellElements = []; // Same indexing as `cellStates`.
 
 // Convert (row, column) coordinates into an index of the flat arrays
 const indexOf = (row, column) => row * N + column;
@@ -44,21 +42,27 @@ const indexOf = (row, column) => row * N + column;
  * Setup
  */
 
-// Build the board: set its size via CSS variables and create one element per cell
-function initializeGrid() {
+// Configure the board layout via CSS variables and grid template
+function configureBoardLayout() {
+	// Set the board's maximum size and the gap between cells via CSS variables
 	board.style.setProperty("--board-max-size", `${N * PIXEL_SIZE + (N - 1) * GAP_SIZE}px`);
 	board.style.setProperty("--pixel-gap", `${GAP_SIZE}px`);
+
+	// Set the grid template to create N columns and N rows with equal fractions of available space
 	board.style.gridTemplateColumns = `repeat(${N}, minmax(0, 1fr))`;
 	board.style.gridTemplateRows = `repeat(${N}, minmax(0, 1fr))`;
+}
 
-	// Build all cells off-DOM first, then append them in a single operation
+// Create all cell elements and append them to the board
+function createBoardCells() {
+	// Create a document fragment to hold the cells before appending them to the board
 	const fragment = document.createDocumentFragment();
 
+	// Create all N*N cells and append them to the fragment
 	for (let index = 0; index < N * N; index++) {
 		const pixel = document.createElement("div");
 		pixel.className = "pixel";
-		// Store the index so the click handler knows which cell was clicked
-		pixel.dataset.index = index;
+		pixel.dataset.index = index; // Store the index for later reference.
 		cellElements.push(pixel);
 		fragment.append(pixel);
 	}
@@ -66,33 +70,21 @@ function initializeGrid() {
 	board.append(fragment);
 }
 
-
-/*
- * State updates
- * Always change a cell through setCellState, so state and DOM stay in sync.
- */
-
+// Always change a cell through setCellState, so state and DOM stay in sync.
 function setCellState(index, alive) {
 	cellStates[index] = alive;
 	cellElements[index].classList.toggle("is-alive", alive);
 }
 
-// Kill every cell
-function reset() {
-	cellStates.forEach((alive, index) => {
-		if (alive) setCellState(index, false);
-	});
-}
+// Game of Life rules for the next generation of a cell
+function cellNextGeneration(alive, index) {
+	const row = Math.floor(index / N);
+	const column = index % N;
 
-/*
- * Game of Life rules
- */
+	let neighbors = 0;
 
-// Count the live cells among the 8 surrounding ones.
-// Edges are not wrapped: cells outside the board count as dead.
-function countAliveNeighbors(row, column) {
-	let count = 0;
-
+	// Count the live cells among the 8 surrounding ones.
+	// Edges are not wrapped: cells outside the board count as dead.
 	for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
 		for (let columnOffset = -1; columnOffset <= 1; columnOffset++) {
 			if (rowOffset === 0 && columnOffset === 0) continue; // skip the cell itself
@@ -103,25 +95,34 @@ function countAliveNeighbors(row, column) {
 				neighborRow >= 0 && neighborRow < N &&
 				neighborColumn >= 0 && neighborColumn < N;
 
-			if (isValidNeighbor && cellStates[indexOf(neighborRow, neighborColumn)]) count++;
+			if (isValidNeighbor && cellStates[indexOf(neighborRow, neighborColumn)]) neighbors++;
 		}
 	}
 
-	return count;
+	// A live cell survives with two or three neighbors; a dead cell is born with three
+	return (neighbors === 3 || (alive && neighbors === 2));
+}
+
+
+/*
+ * Game controls
+ */
+
+// Start the simulation loop
+function gameStart() {
+	runIntervalId = setInterval(gameStep, 100);
+}
+
+// Stop the simulation loop
+function gameStop() {
+	clearInterval(runIntervalId);
+	runIntervalId = null;
 }
 
 // Advance the simulation by one generation
-function step() {
-	// Compute the whole next generation from the current one *before* changing anything,
-	// otherwise updated cells would affect their neighbors' counts in the same step
-	const nextCellStates = cellStates.map((alive, index) => {
-		const row = Math.floor(index / N);
-		const column = index % N;
-		const neighbors = countAliveNeighbors(row, column);
-
-		// A live cell survives with two or three neighbors; a dead cell is born with three
-		return neighbors === 3 || (alive && neighbors === 2);
-	});
+function gameStep() {
+	// Compute the next generation for all cells without modifying the current state
+	const nextCellStates = cellStates.map(cellNextGeneration);
 
 	// Touch the DOM only for cells whose state actually changed
 	nextCellStates.forEach((alive, index) => {
@@ -129,65 +130,64 @@ function step() {
 	});
 }
 
-/*
- * Simulation controls
- */
-
-// Start the simulation loop
-function start() {
-    intervalId = setInterval(step, 100);
+// Kill every cell
+function gameReset() {
+	cellStates.forEach((alive, index) => {
+		if (alive) setCellState(index, false);
+	});
 }
 
-// Stop the simulation loop
-function stop() {
-    clearInterval(intervalId);
-    intervalId = null;
-}
 
 /*
  * Event handlers
  */
 
-// Toggle the clicked cell. A single listener on the board handles all cells
-// (event delegation) instead of attaching N*N separate listeners.
+function handleStartClick() {
+	if (runIntervalId !== null) return;
+	gameStart();
+}
+
+function handleStopClick() {
+	if (runIntervalId === null) return;
+	gameStop();
+}
+
+function handleStepClick() {
+	if (runIntervalId !== null) return;
+	gameStep();
+}
+
+function handleResetClick() {
+	if (runIntervalId !== null) {
+		gameStop();
+	}
+	gameReset();
+}
+
 function handleBoardClick(event) {
+	if (runIntervalId !== null) {
+		gameStop();
+	}
+
+	// A single listener on the board handles all cells (event delegation)
 	const pixel = event.target.closest(".pixel");
 	if (!pixel) return; // click on a gap, not on a cell
 
-    // toggle the clicked cell's state
+	// Toggle the clicked cell's state.
 	const index = Number(pixel.dataset.index);
 	setCellState(index, !cellStates[index]);
 }
 
-function handleStepClick() {
-    if (intervalId !== null) return;
-    step();
-}
-
-function handleResetClick() {
-    if (intervalId !== null) {
-        stop();
-    }
-    reset();
-}
-
-function handleStartClick() {
-    if (intervalId !== null) return;
-    start();
-}
-
-function handleStopClick() {
-    if (intervalId === null) return;
-    stop();
-}
 
 /*
  * Initialize
  */
-initializeGrid();
+configureBoardLayout();
+createBoardCells();
 
-stepButton.addEventListener("click", handleStepClick);
-resetButton.addEventListener("click", handleResetClick);
 startButton.addEventListener("click", handleStartClick);
 stopButton.addEventListener("click", handleStopClick);
+stepButton.addEventListener("click", handleStepClick);
+resetButton.addEventListener("click", handleResetClick);
+
 board.addEventListener("click", handleBoardClick);

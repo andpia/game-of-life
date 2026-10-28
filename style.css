@@ -1,6 +1,7 @@
+/* Set the board width to be responsive with a maximum size */
 .board {
 	display: grid;
-	width: min(100%, var(--board-max-size));    /* Set the board width to be responsive with a maximum size */
+	width: min(100%, var(--board-max-size));
 	aspect-ratio: 1;
 	gap: var(--pixel-gap);
 }
