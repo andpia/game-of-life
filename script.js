@@ -18,10 +18,12 @@ const startButton = document.querySelector("#start-button");
 const stopButton = document.querySelector("#stop-button");
 const stepButton = document.querySelector("#step-button");
 const resetButton = document.querySelector("#reset-button");
+const generationCounter = document.querySelector("#generation-counter");
 const board = document.querySelector("#board");
 
 // Interval ID for the simulation loop (null if not running)
 let runIntervalId = null;
+let generation = 0;
 
 
 /*
@@ -128,6 +130,9 @@ function gameStep() {
 	nextCellStates.forEach((alive, index) => {
 		if (alive !== cellStates[index]) setCellState(index, alive);
 	});
+
+	generation++;
+	generationCounter.textContent = generation;
 }
 
 // Kill every cell
@@ -135,6 +140,9 @@ function gameReset() {
 	cellStates.forEach((alive, index) => {
 		if (alive) setCellState(index, false);
 	});
+
+	generation = 0;
+	generationCounter.textContent = generation;
 }
 
 
