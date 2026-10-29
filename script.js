@@ -128,16 +128,18 @@ function gameStep() {
 
 	// Touch the DOM only for cells whose state actually changed
 	nextCellStates.forEach((alive, index) => {
-        cellElements[index].classList.remove("is-born");
-        cellElements[index].classList.remove("is-died");
-        
+        cellElements[index].classList.remove("is-born", "is-died");
+
         if (alive !== cellStates[index]) {
             // The cell's state has changed, so update it and mark it as born or died if not auto.
             setCellState(index, alive);
             if (runIntervalId === null)
             {
-                cellElements[index].classList.toggle("is-born", alive);
-                cellElements[index].classList.toggle("is-died", !alive);
+				if (alive) {
+					cellElements[index].classList.add("is-born");
+				} else {
+					cellElements[index].classList.add("is-died");
+				}
             }
         }
 	});
@@ -150,8 +152,7 @@ function gameStep() {
 function gameReset() {
 	cellStates.forEach((alive, index) => {
 		if (alive) setCellState(index, false);
-        cellElements[index].classList.remove("is-born");
-        cellElements[index].classList.remove("is-died");
+		cellElements[index].classList.remove("is-born", "is-died");
 	});
 
 	generation = 0;
