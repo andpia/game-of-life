@@ -151,13 +151,19 @@ function gameStep() {
 	[currentState, nextState] = [nextState, currentState]; // Swap buffers
 
 	// Touch the DOM only for the cells whose state changed
-	for (const index of changed) {
-		const alive = currentState[index] === 1;
-		setCell(index, alive, true);
+	if (changed.length !== 0) {
+		for (const index of changed) {
+			const alive = currentState[index] === 1;
+			setCell(index, alive, true);
+		}
+
+		generation++;
+		generationCounter.textContent = generation;
+	} else {
+		// No changes, the simulation has reached a stable state
+		gameStop();
 	}
 
-	generation++;
-	generationCounter.textContent = generation;
 }
 
 // Kill every cell
