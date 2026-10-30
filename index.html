@@ -14,6 +14,41 @@
 	<button id="reset-button" type="button">Reset</button>
 	<label for="size-input">Size: <input type="number" id="size-input" name="grid-size" min="1" max="100" value="20"></input></label>
 	<label for="generation-output">Generation: <output id="generation-output" aria-live="polite">0</output></label>
+	
 	<div class="board" id="board"></div>
+
+	<section id="rules-section" class="rules-section" aria-labelledby="rules-title">
+      <h2 id="rules-title">Rules</h2>
+      <p>
+        The universe of the Game of Life is an infinite, two-dimensional
+        orthogonal grid of square cells, each of which is in one of two possible
+        states, <span class="live">live</span> or <span class="dead">dead</span>. Every cell interacts with its eight neighbours,
+        which are the cells that are horizontally, vertically, or diagonally
+        adjacent.
+      </p>
+      <p>At each step in time (tick), the following transitions occur:</p>
+      <ul>
+        <li>
+          Any <span class="live">live</span> cell with fewer than two live neighbours <span class="dead">dies</span>
+          (underpopulation).
+        </li>
+        <li>
+          Any <span class="live">live</span> cell with two or three live neighbours <span class="live">lives</span> on to the next
+          generation (survival).
+        </li>
+        <li>
+          Any <span class="live">live</span> cell with more than three live neighbours <span class="dead">dies</span>
+          (overpopulation).
+        </li>
+        <li>
+          Any <span class="dead">dead</span> cell with exactly three live neighbours becomes a <span class="live">live</span> cell
+          (reproduction).
+        </li>
+      </ul>
+      <p>
+        The initial pattern constitutes the seed of the system, from which all
+        subsequent generations evolve according to the rules described above.
+      </p>
+    </section>
 </body>
 </html>
