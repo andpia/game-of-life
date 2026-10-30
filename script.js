@@ -2,8 +2,17 @@
  * Configuration
  */
 
+// DOM references
+const startButton = document.querySelector("#start-button");
+const stopButton = document.querySelector("#stop-button");
+const stepButton = document.querySelector("#step-button");
+const resetButton = document.querySelector("#reset-button");
+const generationOutput = document.querySelector("#generation-output");
+const sizeInput = document.querySelector("#size-input");
+const board = document.querySelector("#board");
+
 // Number of cells per row and column (the grid is N x N)
-const N = 100;
+let gridSize = Number(sizeInput.value);
 
 // Maximum size of each cell and gap between cells (in pixels)
 const PIXEL_SIZE = 10;
@@ -19,22 +28,12 @@ const TICK_MS = 100;
  * The grid is stored with a border of permanently dead cells around it,
  * so every cell always has 8 neighbors and no bounds checks are needed.
  */
-const W = N + 2; // width of the padded grid
-const NEIGHBOR_OFFSETS = [-W - 1, -W, -W + 1, -1, 1, W - 1, W, W + 1];
+let W = gridSize + 2; // width of the padded grid
+let NEIGHBOR_OFFSETS = [-W - 1, -W, -W + 1, -1, 1, W - 1, W, W + 1];
 
 // Convert (row, column) coordinates (0-based, without border) into an index of the padded grid
 const indexOf = (row, column) => (row + 1) * W + (column + 1);
 
-
-/*
- * DOM references
- */
-const startButton = document.querySelector("#start-button");
-const stopButton = document.querySelector("#stop-button");
-const stepButton = document.querySelector("#step-button");
-const resetButton = document.querySelector("#reset-button");
-const generationCounter = document.querySelector("#generation-counter");
-const board = document.querySelector("#board");
 
 // Interval ID for the simulation loop (null if not running)
 let runIntervalId = null;
@@ -51,7 +50,7 @@ let generation = 0;
 let currentState = new Uint8Array(W * W);
 let nextState = new Uint8Array(W * W);
 
-const cellElements = new Array(W * W); // Same indexing as the buffers
+let cellElements = new Array(W * W); // Same indexing as the buffers
 
 // Cells with a transient class (is-born / is-died) to clear on the next step
 let markedCells = [];
@@ -61,20 +60,18 @@ let markedCells = [];
  * Setup
  */
 
-// Configure the board layout via CSS variables and grid template
-function configureBoardLayout() {
-	board.style.setProperty("--board-max-size", `${N * PIXEL_SIZE + (N - 1) * GAP_SIZE}px`);
+function createBoard() {
+	// Configure the board layout via CSS variables and grid template
+	board.style.setProperty("--board-max-size", `${gridSize * PIXEL_SIZE + (gridSize - 1) * GAP_SIZE}px`);
 	board.style.setProperty("--pixel-gap", `${GAP_SIZE}px`);
-	board.style.gridTemplateColumns = `repeat(${N}, minmax(0, 1fr))`;
-	board.style.gridTemplateRows = `repeat(${N}, minmax(0, 1fr))`;
-}
+	board.style.gridTemplateColumns = `repeat(${gridSize}, minmax(0, 1fr))`;
+	board.style.gridTemplateRows = `repeat(${gridSize}, minmax(0, 1fr))`;
 
-// Create all cell elements and append them to the board (row-major order)
-function createBoardCells() {
+	// Create all cell elements and append them to the board (row-major order)
 	const fragment = document.createDocumentFragment();
 
-	for (let row = 0; row < N; row++) {
-		for (let column = 0; column < N; column++) {
+	for (let row = 0; row < gridSize; row++) {
+		for (let column = 0; column < gridSize; column++) {
 			const index = indexOf(row, column);
 			const pixel = document.createElement("div");
 			pixel.className = "pixel";
@@ -85,6 +82,24 @@ function createBoardCells() {
 	}
 
 	board.append(fragment);
+
+	generation = 0;
+	generationOutput.textContent = generation;
+}
+
+// Destroy the current board and recreate its state buffers for a new size
+function rebuildBoard(newSize) {
+	clearMarks();
+	board.replaceChildren();
+
+	gridSize = newSize;
+	W = gridSize + 2;
+	NEIGHBOR_OFFSETS = [-W - 1, -W, -W + 1, -1, 1, W - 1, W, W + 1];
+	currentState = new Uint8Array(W * W);
+	nextState = new Uint8Array(W * W);
+	cellElements = new Array(W * W);
+
+	createBoard();
 }
 
 // Always change a cell through setCell, so state and DOM stay in sync
@@ -130,8 +145,8 @@ function gameStep() {
 	const changed = [];
 
 	// Compute the next generation into `next`, reading only from `current`
-	for (let row = 1; row <= N; row++) {
-		for (let column = 1; column <= N; column++) {
+	for (let row = 1; row <= gridSize; row++) {
+		for (let column = 1; column <= gridSize; column++) {
 			const index = row * W + column;
 
 			let neighbors = 0;
@@ -158,7 +173,7 @@ function gameStep() {
 		}
 
 		generation++;
-		generationCounter.textContent = generation;
+		generationOutput.textContent = generation;
 	} else {
 		// No changes, the simulation has reached a stable state
 		gameStop();
@@ -175,7 +190,7 @@ function gameReset() {
 	}
 
 	generation = 0;
-	generationCounter.textContent = generation;
+	generationOutput.textContent = generation;
 }
 
 
@@ -203,6 +218,14 @@ function handleResetClick() {
 	gameReset();
 }
 
+function handleSizeChange() {
+	if (runIntervalId !== null) gameStop();
+	const newSize = Number(sizeInput.value);
+	if (newSize >= 1 && newSize <= 100) {
+		rebuildBoard(newSize);
+	}
+}
+
 function handleBoardClick(event) {
 	if (runIntervalId !== null) gameStop();
 
@@ -218,12 +241,12 @@ function handleBoardClick(event) {
 /*
  * Initialize
  */
-configureBoardLayout();
-createBoardCells();
+createBoard();
 
 startButton.addEventListener("click", handleStartClick);
 stopButton.addEventListener("click", handleStopClick);
 stepButton.addEventListener("click", handleStepClick);
 resetButton.addEventListener("click", handleResetClick);
+sizeInput.addEventListener("change", handleSizeChange);
 
 board.addEventListener("click", handleBoardClick);
