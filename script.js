@@ -10,6 +10,7 @@ const resetButton = document.querySelector("#reset-button");
 const generationOutput = document.querySelector("#generation-output");
 const sizeInput = document.querySelector("#size-input");
 const board = document.querySelector("#board");
+const populationOutput = document.querySelector("#population-output");
 
 // Number of cells per row and column (the grid is N x N)
 let gridSize = Number(sizeInput.value);
@@ -85,6 +86,7 @@ function createBoard() {
 
 	generation = 0;
 	generationOutput.textContent = generation;
+	populationOutput.textContent = 0;
 }
 
 // Destroy the current board and recreate its state buffers for a new size
@@ -179,6 +181,7 @@ function gameStep() {
 		gameStop();
 	}
 
+	populationOutput.textContent = currentState.reduce((sum, cell) => sum + cell, 0);
 }
 
 // Kill every cell
@@ -191,6 +194,7 @@ function gameReset() {
 
 	generation = 0;
 	generationOutput.textContent = generation;
+	populationOutput.textContent = 0;
 }
 
 
