@@ -11,6 +11,8 @@ const generationOutput = document.querySelector("#generation-output");
 const sizeInput = document.querySelector("#size-input");
 const board = document.querySelector("#board");
 const populationOutput = document.querySelector("#population-output");
+const maxPopulationOutput = document.querySelector("#max-population-output");
+const maxPopulationGenerationOutput = document.querySelector("#max-population-generation-output");
 
 // Number of cells per row and column (the grid is N x N)
 let gridSize = Number(sizeInput.value);
@@ -38,7 +40,10 @@ const indexOf = (row, column) => (row + 1) * W + (column + 1);
 
 // Interval ID for the simulation loop (null if not running)
 let runIntervalId = null;
+// Population tracking
 let generation = 0;
+let maxPopulation = 0;
+let maxPopulationGeneration = 0;
 
 
 /*
@@ -87,6 +92,10 @@ function createBoard() {
 	generation = 0;
 	generationOutput.textContent = generation;
 	populationOutput.textContent = 0;
+	maxPopulation = 0;
+	maxPopulationGeneration = 0;
+	maxPopulationOutput.textContent = maxPopulation;
+	maxPopulationGenerationOutput.textContent = maxPopulationGeneration;
 }
 
 // Destroy the current board and recreate its state buffers for a new size
@@ -124,6 +133,17 @@ function clearMarks() {
 		cellElements[index].classList.remove("is-born", "is-died");
 	}
 	markedCells = [];
+}
+
+function updatePopulation() {
+	const population = currentState.reduce((sum, cell) => sum + cell, 0);
+	populationOutput.textContent = population;
+	if (population > maxPopulation) {
+		maxPopulation = population;
+		maxPopulationGeneration = generation;
+	}
+	maxPopulationOutput.textContent = maxPopulation;
+	maxPopulationGenerationOutput.textContent = maxPopulationGeneration;
 }
 
 
@@ -181,7 +201,7 @@ function gameStep() {
 		gameStop();
 	}
 
-	populationOutput.textContent = currentState.reduce((sum, cell) => sum + cell, 0);
+	updatePopulation();
 }
 
 // Kill every cell
@@ -194,7 +214,9 @@ function gameReset() {
 
 	generation = 0;
 	generationOutput.textContent = generation;
-	populationOutput.textContent = 0;
+	maxPopulation = 0;
+	maxPopulationGeneration = 0;
+	updatePopulation();
 }
 
 
@@ -239,6 +261,7 @@ function handleBoardClick(event) {
 
 	const index = Number(pixel.dataset.index);
 	setCell(index, currentState[index] === 0, false);
+	updatePopulation();
 }
 
 
