@@ -14,6 +14,7 @@ const populationOutput = document.querySelector("#population-output");
 const uniqueCellsLivedOutput = document.querySelector("#unique-cells-lived-output");
 const maxPopulationOutput = document.querySelector("#max-population-output");
 const maxPopulationGenerationOutput = document.querySelector("#max-population-generation-output");
+const patternButtons = document.querySelectorAll(".pattern-button");
 
 // Number of cells per row and column (the grid is N x N)
 let gridSize = Number(sizeInput.value);
@@ -23,6 +24,103 @@ const GAP_SIZE = 1;
 
 // Simulation interval (in milliseconds)
 const TICK_MS = 100;
+
+function patternFromRows(rows) {
+	const cells = [];
+
+	for (const [rowIndex, row] of rows.entries()) {
+		for (const [column, cell] of [...row].entries()) {
+			if (cell === "O") cells.push([column, rowIndex]);
+		}
+	}
+
+	return { width: rows[0].length, height: rows.length, cells };
+}
+
+const PATTERNS = {
+	glider: {
+		width: 3,
+		height: 3,
+		cells: [[1, 0], [2, 1], [0, 2], [1, 2], [2, 2]]
+	},
+	blinker: {
+		width: 3,
+		height: 1,
+		cells: [[0, 0], [1, 0], [2, 0]]
+	},
+	toad: {
+		width: 4,
+		height: 2,
+		cells: [[1, 0], [2, 0], [3, 0], [0, 1], [1, 1], [2, 1]]
+	},
+	beacon: {
+		width: 4,
+		height: 4,
+		cells: [[0, 0], [1, 0], [0, 1], [1, 1], [2, 2], [3, 2], [2, 3], [3, 3]]
+	},
+	"r-pentomino": {
+		width: 3,
+		height: 3,
+		cells: [[1, 0], [2, 0], [0, 1], [1, 1], [1, 2]]
+	},
+	acorn: {
+		width: 7,
+		height: 3,
+		cells: [[1, 0], [3, 1], [0, 2], [1, 2], [4, 2], [5, 2], [6, 2]]
+	},
+	"lightweight-spaceship": {
+		width: 5,
+		height: 4,
+		cells: [[1, 0], [2, 0], [3, 0], [4, 0], [0, 1], [4, 1], [4, 2], [0, 3], [3, 3], [4, 3]]
+	},
+	tub: patternFromRows([
+		".O.",
+		"O.O",
+		".O."
+	]),
+	loaf: patternFromRows([
+		".OO.",
+		"O..O",
+		".O.O",
+		"..O."
+	]),
+	diehard: patternFromRows([
+		"......O.",
+		"OO......",
+		".O...OOO"
+	]),
+	pentadecathlon: patternFromRows([
+		"..O....O..",
+		"OO.OOOO.OO",
+		"..O....O.."
+	]),
+	pulsar: patternFromRows([
+		"..OOO...OOO..",
+		".............",
+		"O....O.O....O",
+		"O....O.O....O",
+		"O....O.O....O",
+		"..OOO...OOO..",
+		".............",
+		"..OOO...OOO..",
+		"O....O.O....O",
+		"O....O.O....O",
+		"O....O.O....O",
+		".............",
+		"..OOO...OOO.."
+	]),
+	"gosper-glider-gun": patternFromRows([
+		"........................O...........",
+		"......................O.O...........",
+		"............OO......OO............OO",
+		"...........O...O....OO............OO",
+		"OO........O.....O...OO..............",
+		"OO........O...O.OO....O.O...........",
+		"..........O.....O.......O...........",
+		"...........O...O....................",
+		"............OO......................"
+	])
+};
 
 
 /*
@@ -98,6 +196,7 @@ function createBoard() {
 	maxPopulationGeneration = 0;
 	maxPopulationOutput.textContent = maxPopulation;
 	maxPopulationGenerationOutput.textContent = maxPopulationGeneration;
+	updatePatternAvailability();
 }
 
 // Destroy the current board and recreate its state buffers for a new size
@@ -232,6 +331,26 @@ function gameReset() {
 	updatePopulation();
 }
 
+function updatePatternAvailability() {
+	for (const button of patternButtons) {
+		const pattern = PATTERNS[button.dataset.pattern];
+		button.disabled = !pattern || pattern.width > gridSize || pattern.height > gridSize;
+	}
+}
+
+function placePattern(pattern) {
+	if (runIntervalId !== null) gameStop();
+	gameReset();
+
+	const top = Math.floor((gridSize - pattern.height) / 2);
+	const left = Math.floor((gridSize - pattern.width) / 2);
+	for (const [column, row] of pattern.cells) {
+		setCell(indexOf(top + row, left + column), true, false);
+	}
+
+	updatePopulation();
+}
+
 
 /*
  * Event handlers
@@ -288,5 +407,10 @@ stopButton.addEventListener("click", handleStopClick);
 stepButton.addEventListener("click", handleStepClick);
 resetButton.addEventListener("click", handleResetClick);
 sizeInput.addEventListener("change", handleSizeChange);
+for (const button of patternButtons) {
+	button.addEventListener("click", () => {
+		placePattern(PATTERNS[button.dataset.pattern]);
+	});
+}
 
 board.addEventListener("click", handleBoardClick);

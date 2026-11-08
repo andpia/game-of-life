@@ -92,6 +92,15 @@ input:focus-visible {
 	color: var(--color-lime);
 }
 
+.eyebrow a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.eyebrow a:hover {
+	color: var(--color-lime);
+}
+
 h1,
 h2,
 p {
@@ -205,6 +214,15 @@ h1 span {
 	transform: translateY(-1px);
 	border-color: var(--color-lime);
 	background: #f0f5eb;
+}
+
+.control-button:disabled,
+.control-button:disabled:hover {
+	transform: none;
+	border-color: var(--color-line);
+	background: var(--color-panel-raised);
+	color: var(--color-muted);
+	cursor: not-allowed;
 }
 
 .button-start {
@@ -330,6 +348,70 @@ h1 span {
 
 .rule-death {
 	color: var(--color-orange);
+}
+
+.patterns-section {
+	margin-top: 32px;
+	padding-top: 24px;
+	border-top: 1px solid var(--color-line);
+}
+
+.references-section {
+	margin-top: 32px;
+	padding-top: 24px;
+	border-top: 1px solid var(--color-line);
+}
+
+.reference-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 24px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 11px;
+}
+
+.reference-list a {
+	color: var(--color-lime);
+	text-underline-offset: 3px;
+}
+
+.reference-list a:hover {
+	color: var(--color-text);
+}
+
+.pattern-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: 9px;
+}
+
+.pattern-button {
+	display: flex;
+	min-height: 58px;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	text-align: center;
+}
+
+.pattern-button .pattern-size {
+	padding: 0;
+	color: var(--color-muted);
+	font-size: 9px;
+}
+
+.pattern-button:disabled,
+.pattern-button:disabled:hover {
+	border-color: #e1e5de;
+	background: #edf0eb;
+	color: #92998e;
+}
+
+.pattern-button:disabled .pattern-size {
+	color: #a4aa9f;
 }
 
 @media (max-width: 760px) {
