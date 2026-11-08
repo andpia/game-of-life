@@ -9,6 +9,8 @@ const stepButton = document.querySelector("#step-button");
 const resetButton = document.querySelector("#reset-button");
 const generationOutput = document.querySelector("#generation-output");
 const sizeInput = document.querySelector("#size-input");
+const speedInput = document.querySelector("#speed-input");
+const speedOutput = document.querySelector("#speed-output");
 const board = document.querySelector("#board");
 const populationOutput = document.querySelector("#population-output");
 const uniqueCellsLivedOutput = document.querySelector("#unique-cells-lived-output");
@@ -21,9 +23,6 @@ let gridSize = Number(sizeInput.value);
 
 // Gap between cells (in pixels)
 const GAP_SIZE = 1;
-
-// Simulation interval (in milliseconds)
-const TICK_MS = 100;
 
 function patternFromRows(rows) {
 	const cells = [];
@@ -261,7 +260,7 @@ function updatePopulation() {
  */
 
 function gameStart() {
-	runIntervalId = setInterval(gameStep, TICK_MS);
+	runIntervalId = setInterval(gameStep, Number(speedInput.value));
 }
 
 function gameStop() {
@@ -384,6 +383,14 @@ function handleSizeChange() {
 	}
 }
 
+function handleSpeedChange() {
+	speedOutput.textContent = `${speedInput.value} ms`;
+	if (runIntervalId !== null) {
+		gameStop();
+		gameStart();
+	}
+}
+
 function handleBoardClick(event) {
 	if (runIntervalId !== null) gameStop();
 
@@ -407,6 +414,7 @@ stopButton.addEventListener("click", handleStopClick);
 stepButton.addEventListener("click", handleStepClick);
 resetButton.addEventListener("click", handleResetClick);
 sizeInput.addEventListener("change", handleSizeChange);
+speedInput.addEventListener("input", handleSpeedChange);
 for (const button of patternButtons) {
 	button.addEventListener("click", () => {
 		placePattern(PATTERNS[button.dataset.pattern]);

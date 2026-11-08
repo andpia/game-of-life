@@ -270,6 +270,26 @@ h1 span {
 	font-size: 9px;
 }
 
+.speed-control {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 8px;
+	margin-top: 18px;
+	color: var(--color-muted);
+	font-size: 10px;
+}
+
+.speed-control input {
+	width: 100%;
+	grid-column: 1 / -1;
+	margin: 0;
+	accent-color: var(--color-lime);
+}
+
+.speed-control span:last-child {
+	text-align: right;
+}
+
 .stats-grid {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -39,6 +39,12 @@
 						<span>Grid size</span>
 						<span class="input-wrap"><input type="number" id="size-input" name="grid-size" min="1" max="100" value="20"><span>CELLS</span></span>
 					</label>
+					<div class="speed-control">
+						<label for="speed-input">Generation interval</label>
+						<output id="speed-output" for="speed-input">100 ms</output>
+						<input type="range" id="speed-input" name="generation-interval" min="50" max="1000" step="50" value="100">
+						<span>Faster</span><span>Slower</span>
+					</div>
 				</section>
 
 				<section class="panel-section" aria-labelledby="stats-title">
