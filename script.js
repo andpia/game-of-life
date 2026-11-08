@@ -17,8 +17,7 @@ const maxPopulationGenerationOutput = document.querySelector("#max-population-ge
 // Number of cells per row and column (the grid is N x N)
 let gridSize = Number(sizeInput.value);
 
-// Maximum size of each cell and gap between cells (in pixels)
-const PIXEL_SIZE = 10;
+// Gap between cells (in pixels)
 const GAP_SIZE = 1;
 
 // Simulation interval (in milliseconds)
@@ -68,7 +67,6 @@ let markedCells = [];
 
 function createBoard() {
 	// Configure the board layout via CSS variables and grid template
-	board.style.setProperty("--board-max-size", `${gridSize * PIXEL_SIZE + (gridSize - 1) * GAP_SIZE}px`);
 	board.style.setProperty("--pixel-gap", `${GAP_SIZE}px`);
 	board.style.gridTemplateColumns = `repeat(${gridSize}, minmax(0, 1fr))`;
 	board.style.gridTemplateRows = `repeat(${gridSize}, minmax(0, 1fr))`;

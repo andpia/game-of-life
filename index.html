@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="theme-color" content="#101510">
+	<meta name="theme-color" content="#f3f5f0">
 	<title>Conway's Game of Life</title>
 	<link rel="stylesheet" href="style.css">
 	<script src="script.js" defer></script>
@@ -13,91 +13,77 @@
 		<header class="site-header">
 			<div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 			<div>
-				<p class="eyebrow">ARCADE OF LIFE <span>•</span> 001</p>
-				<h1>Game of <span>Life</span></h1>
+				<p class="eyebrow">BremaStackLab <span>•</span> 2026</p>
+				<h1>Conway's Game of <span>Life</span></h1>
 			</div>
-			<p class="system-status"><span class="status-light"></span> SISTEMA ONLINE</p>
 		</header>
 
 		<div class="game-layout">
-			<section class="game-screen" aria-labelledby="board-title">
-				<div class="screen-heading">
-					<div>
-						<p class="eyebrow">SIMULAZIONE IN CORSO</p>
-						<h2 id="board-title">Campo di gioco</h2>
-					</div>
-					<span class="screen-tag">LIVE <span class="status-light"></span></span>
-				</div>
-				<div class="board-frame">
-					<div class="board" id="board" aria-label="Griglia del Game of Life"></div>
-				</div>
-				<p class="screen-hint"><span>+</span> CLICCA SULLA GRIGLIA PER CREARE UNA CELLULA</p>
+			<section aria-label="Game board">
+				<div class="board" id="board" aria-label="Game of Life grid"></div>
 			</section>
 
-			<aside class="control-panel" aria-label="Controlli e statistiche">
+			<aside class="control-panel" aria-label="Controls and statistics">
 				<section class="panel-section" aria-labelledby="controls-title">
 					<div class="section-heading">
 						<span class="section-index">01</span>
-						<h2 id="controls-title">Controlli</h2>
+						<h2 id="controls-title">Controls</h2>
 					</div>
 					<div class="button-grid">
-						<button class="control-button button-start" id="start-button" type="button"><span aria-hidden="true">▶</span> Avvia</button>
-						<button class="control-button" id="stop-button" type="button"><span aria-hidden="true">■</span> Ferma</button>
-						<button class="control-button" id="step-button" type="button"><span aria-hidden="true">»</span> Passo</button>
+						<button class="control-button button-start" id="start-button" type="button"><span aria-hidden="true">▶</span> Start</button>
+						<button class="control-button" id="stop-button" type="button"><span aria-hidden="true">■</span> Stop</button>
+						<button class="control-button" id="step-button" type="button"><span aria-hidden="true">»</span> Step</button>
 						<button class="control-button button-reset" id="reset-button" type="button"><span aria-hidden="true">↺</span> Reset</button>
 					</div>
 					<label class="size-control" for="size-input">
-						<span>Dimensione griglia</span>
-						<span class="input-wrap"><input type="number" id="size-input" name="grid-size" min="1" max="100" value="20"><span>CELLE</span></span>
+						<span>Grid size</span>
+						<span class="input-wrap"><input type="number" id="size-input" name="grid-size" min="1" max="100" value="20"><span>CELLS</span></span>
 					</label>
 				</section>
 
-				<section class="panel-section stats-section" aria-labelledby="stats-title">
+				<section class="panel-section" aria-labelledby="stats-title">
 					<div class="section-heading">
 						<span class="section-index">02</span>
-						<h2 id="stats-title">Statistiche</h2>
+						<h2 id="stats-title">Statistics</h2>
 					</div>
 					<div class="stats-grid">
 						<div class="stat-card">
-							<span class="stat-label">Generazione</span>
+							<span class="stat-label">Generation</span>
 							<output class="stat-value" id="generation-output" aria-live="polite">0</output>
 						</div>
 						<div class="stat-card">
-							<span class="stat-label">Cellule vive</span>
+							<span class="stat-label">Live cells</span>
 							<output class="stat-value stat-accent" id="population-output" aria-live="polite">0</output>
 						</div>
 					</div>
 					<div class="record-card">
 						<span class="record-icon" aria-hidden="true">★</span>
 						<div>
-							<span class="stat-label">Picco popolazione</span>
-							<p><output id="max-population-output" aria-live="polite">0</output> cellule <span class="record-divider">/</span> gen. <output id="max-population-generation-output" aria-live="polite">0</output></p>
+							<span class="stat-label">Population peak</span>
+							<p><output id="max-population-output" aria-live="polite">0</output> cells <span class="record-divider">/</span> gen. <output id="max-population-generation-output" aria-live="polite">0</output></p>
 						</div>
 					</div>
 				</section>
 
-				<p class="panel-footer"><span class="footer-pixel"></span> INSERT COIN <span class="footer-pixel"></span></p>
+				<section class="panel-section rules-section" aria-labelledby="rules-title">
+					<div class="section-heading">
+						<span class="section-index">03</span>
+						<h2 id="rules-title">How to play</h2>
+					</div>
+					<div class="rules-content">
+						<p>The Game of Life is a cellular automaton: each cell lives on a grid and interacts with its eight neighbors. In each generation, every cell follows a few simple rules:</p>
+						<ul>
+							<li>With fewer than 2 live neighbors, a cell dies from <span class="rule-death">underpopulation</span>.</li>
+							<li>With 2 or 3 live neighbors, a cell <span class="rule-life">survives</span>.</li>
+							<li>With more than 3 live neighbors, a cell dies from <span class="rule-death">overpopulation</span>.</li>
+							<li>With exactly 3 live neighbors, a cell is born through <span class="rule-life">reproduction</span>.</li>
+						</ul>
+						<p>Draw a pattern on the grid and watch life evolve, one step at a time.</p>
+					</div>
+				</section>
 			</aside>
 		</div>
 
-		<section id="rules-section" class="rules-section" aria-labelledby="rules-title">
-			<div class="section-heading">
-				<span class="section-index">03</span>
-				<h2 id="rules-title">Regole del gioco</h2>
-			</div>
-			<div class="rules-content">
-				<p>Il Game of Life è un automa cellulare: ogni cellula vive in una griglia e interagisce con le otto vicine. A ogni generazione, il destino di ciascuna cellula segue regole semplici:</p>
-				<ul>
-					<li>Con meno di 2 vicine vive, una cellula muore per <span class="rule-death">solitudine</span>.</li>
-					<li>Con 2 o 3 vicine vive, una cellula <span class="rule-life">sopravvive</span>.</li>
-					<li>Con più di 3 vicine vive, una cellula muore per <span class="rule-death">sovraffollamento</span>.</li>
-					<li>Con esattamente 3 vicine vive, una cellula nasce per <span class="rule-life">riproduzione</span>.</li>
-				</ul>
-				<p>Disegna un pattern sulla griglia e guarda la vita evolversi, un passo alla volta.</p>
-			</div>
-		</section>
-
-		<footer class="page-footer"><span>CONWAY'S GAME OF LIFE</span><span>UNIVERSO 2D <span class="footer-pixel"></span> EDIZIONE 001</span></footer>
 	</main>
 </body>
 </html>
