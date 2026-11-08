@@ -11,6 +11,7 @@ const generationOutput = document.querySelector("#generation-output");
 const sizeInput = document.querySelector("#size-input");
 const board = document.querySelector("#board");
 const populationOutput = document.querySelector("#population-output");
+const uniqueCellsLivedOutput = document.querySelector("#unique-cells-lived-output");
 const maxPopulationOutput = document.querySelector("#max-population-output");
 const maxPopulationGenerationOutput = document.querySelector("#max-population-generation-output");
 
@@ -54,6 +55,8 @@ let maxPopulationGeneration = 0;
  */
 let currentState = new Uint8Array(W * W);
 let nextState = new Uint8Array(W * W);
+let hasBeenAlive = new Uint8Array(W * W);
+let uniqueCellsLived = 0;
 
 let cellElements = new Array(W * W); // Same indexing as the buffers
 
@@ -90,6 +93,7 @@ function createBoard() {
 	generation = 0;
 	generationOutput.textContent = generation;
 	populationOutput.textContent = 0;
+	uniqueCellsLivedOutput.textContent = uniqueCellsLived;
 	maxPopulation = 0;
 	maxPopulationGeneration = 0;
 	maxPopulationOutput.textContent = maxPopulation;
@@ -106,6 +110,8 @@ function rebuildBoard(newSize) {
 	NEIGHBOR_OFFSETS = [-W - 1, -W, -W + 1, -1, 1, W - 1, W, W + 1];
 	currentState = new Uint8Array(W * W);
 	nextState = new Uint8Array(W * W);
+	hasBeenAlive = new Uint8Array(W * W);
+	uniqueCellsLived = 0;
 	cellElements = new Array(W * W);
 
 	createBoard();
@@ -114,6 +120,12 @@ function rebuildBoard(newSize) {
 // Always change a cell through setCell, so state and DOM stay in sync
 function setCell(index, alive, changeMark = true) {
 	currentState[index] = alive ? 1 : 0;
+
+	if (alive && hasBeenAlive[index] === 0) {
+		hasBeenAlive[index] = 1;
+		uniqueCellsLived++;
+		uniqueCellsLivedOutput.textContent = uniqueCellsLived;
+	}
 
 	const pixel = cellElements[index];
 	pixel.classList.toggle("is-alive", alive);
@@ -214,6 +226,9 @@ function gameReset() {
 	generationOutput.textContent = generation;
 	maxPopulation = 0;
 	maxPopulationGeneration = 0;
+	hasBeenAlive.fill(0);
+	uniqueCellsLived = 0;
+	uniqueCellsLivedOutput.textContent = uniqueCellsLived;
 	updatePopulation();
 }
 
