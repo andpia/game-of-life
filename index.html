@@ -35,13 +35,15 @@
 						<button class="control-button" id="step-button" type="button"><span aria-hidden="true">»</span> Step</button>
 						<button class="control-button button-reset" id="reset-button" type="button"><span aria-hidden="true">↺</span> Reset</button>
 					</div>
-					<label class="size-control" for="size-input">
-						<span>Grid size</span>
-						<span class="input-wrap"><input type="number" id="size-input" name="grid-size" min="1" max="100" value="20"><span>CELLS</span></span>
-					</label>
+					<div class="size-control">
+						<label for="size-input">Grid size</label>
+						<output id="size-output" for="size-input">20 × 20</output>
+						<input type="range" id="size-input" name="grid-size" min="1" max="100" step="1" value="20">
+						<span>1</span><span>100</span>
+					</div>
 					<div class="speed-control">
 						<label for="speed-input">Generation interval</label>
-						<output id="speed-output" for="speed-input">100 ms</output>
+						<output id="speed-output" for="speed-input">250 ms</output>
 						<input type="range" id="speed-input" name="generation-interval" min="50" max="1000" step="50" value="100">
 						<span>Faster</span><span>Slower</span>
 					</div>

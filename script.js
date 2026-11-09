@@ -9,6 +9,7 @@ const stepButton = document.querySelector("#step-button");
 const resetButton = document.querySelector("#reset-button");
 const generationOutput = document.querySelector("#generation-output");
 const sizeInput = document.querySelector("#size-input");
+const sizeOutput = document.querySelector("#size-output");
 const speedInput = document.querySelector("#speed-input");
 const speedOutput = document.querySelector("#speed-output");
 const board = document.querySelector("#board");
@@ -383,6 +384,10 @@ function handleSizeChange() {
 	}
 }
 
+function updateSizeOutput() {
+	sizeOutput.textContent = `${sizeInput.value} × ${sizeInput.value}`;
+}
+
 function handleSpeedChange() {
 	speedOutput.textContent = `${speedInput.value} ms`;
 	if (runIntervalId !== null) {
@@ -408,11 +413,13 @@ function handleBoardClick(event) {
  * Initialize
  */
 createBoard();
+updateSizeOutput();
 
 startButton.addEventListener("click", handleStartClick);
 stopButton.addEventListener("click", handleStopClick);
 stepButton.addEventListener("click", handleStepClick);
 resetButton.addEventListener("click", handleResetClick);
+sizeInput.addEventListener("input", updateSizeOutput);
 sizeInput.addEventListener("change", handleSizeChange);
 speedInput.addEventListener("input", handleSpeedChange);
 for (const button of patternButtons) {
