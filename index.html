@@ -35,17 +35,17 @@
 						<button class="control-button" id="step-button" type="button"><span aria-hidden="true">»</span> Step</button>
 						<button class="control-button button-reset" id="reset-button" type="button"><span aria-hidden="true">↺</span> Reset</button>
 					</div>
-					<div class="size-control">
-						<label for="size-input">Grid size</label>
-						<output id="size-output" for="size-input">20 × 20</output>
-						<input type="range" id="size-input" name="grid-size" min="1" max="100" step="1" value="20">
-						<span>1</span><span>100</span>
-					</div>
 					<div class="speed-control">
 						<label for="speed-input">Generation interval</label>
 						<output id="speed-output" for="speed-input">250 ms</output>
-						<input type="range" id="speed-input" name="generation-interval" min="50" max="1000" step="50" value="100">
+						<input type="range" id="speed-input" name="generation-interval" min="50" max="1000" step="50" value="200">
 						<span>Faster</span><span>Slower</span>
+					</div>					
+					<div class="size-control">
+						<label for="size-input">Grid size</label>
+						<output id="size-output" for="size-input">20 × 20</output>
+						<input type="range" id="size-input" name="grid-size" min="5" max="100" step="1" value="20">
+						<span>5</span><span>100</span>
 					</div>
 				</section>
 
@@ -102,6 +102,11 @@
 				<button class="control-button pattern-button" type="button" data-pattern="r-pentomino">R-pentomino <span class="pattern-size">3 × 3</span></button>
 				<button class="control-button pattern-button" type="button" data-pattern="acorn">Acorn <span class="pattern-size">7 × 3</span></button>
 				<button class="control-button pattern-button" type="button" data-pattern="lightweight-spaceship">Lightweight spaceship <span class="pattern-size">5 × 4</span></button>
+				<button class="control-button pattern-button" type="button" data-pattern="block">Block <span class="pattern-size">2 × 2</span></button>
+				<button class="control-button pattern-button" type="button" data-pattern="beehive">Beehive <span class="pattern-size">4 × 3</span></button>
+				<button class="control-button pattern-button" type="button" data-pattern="boat">Boat <span class="pattern-size">3 × 3</span></button>
+				<button class="control-button pattern-button" type="button" data-pattern="middleweight-spaceship">Middleweight spaceship <span class="pattern-size">6 × 5</span></button>
+				<button class="control-button pattern-button" type="button" data-pattern="heavyweight-spaceship">Heavyweight spaceship <span class="pattern-size">7 × 5</span></button>
 				<button class="control-button pattern-button" type="button" data-pattern="tub">Tub <span class="pattern-size">3 × 3</span></button>
 				<button class="control-button pattern-button" type="button" data-pattern="loaf">Loaf <span class="pattern-size">4 × 4</span></button>
 				<button class="control-button pattern-button" type="button" data-pattern="diehard">Diehard <span class="pattern-size">8 × 3</span></button>

@@ -73,6 +73,34 @@ const PATTERNS = {
 		height: 4,
 		cells: [[1, 0], [2, 0], [3, 0], [4, 0], [0, 1], [4, 1], [4, 2], [0, 3], [3, 3], [4, 3]]
 	},
+	block: patternFromRows([
+		"OO",
+		"OO"
+	]),
+	beehive: patternFromRows([
+		".OO.",
+		"O..O",
+		".OO."
+	]),
+	boat: patternFromRows([
+		"OO.",
+		"O.O",
+		".O."
+	]),
+	"middleweight-spaceship": patternFromRows([
+		"...O..",
+		".O...O",
+		"O.....",
+		"O....O",
+		"OOOOO."
+	]),
+	"heavyweight-spaceship": patternFromRows([
+		"...OO..",
+		".O....O",
+		"O......",
+		"O.....O",
+		"OOOOOO."
+	]),
 	tub: patternFromRows([
 		".O.",
 		"O.O",
