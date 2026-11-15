@@ -342,12 +342,7 @@ h1 span {
 	color: var(--color-orange);
 }
 
-.patterns-section {
-	margin-top: 32px;
-	padding-top: 24px;
-	border-top: 1px solid var(--color-line);
-}
-
+.patterns-section,
 .references-section {
 	margin-top: 32px;
 	padding-top: 24px;

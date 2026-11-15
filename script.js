@@ -186,8 +186,8 @@ let uniqueCellsLived = 0;
 
 let cellElements = new Array(W * W); // Same indexing as the buffers
 
-// Cells with a transient class (is-born / is-died) to clear on the next step
-let markedCells = [];
+// Cells with a temporary change class, cleared before the next manual step.
+const markedCells = new Set();
 
 
 /*
@@ -259,8 +259,9 @@ function setCell(index, alive, changeMark = true) {
 
 	// If the simulation is not running, mark the cell as born/died
 	if (changeMark && runIntervalId === null) {
+		pixel.classList.remove("is-born", "is-died");
 		pixel.classList.add(alive ? "is-born" : "is-died");
-		markedCells.push(index);
+		markedCells.add(index);
 	}
 }
 
@@ -269,7 +270,7 @@ function clearMarks() {
 	for (const index of markedCells) {
 		cellElements[index].classList.remove("is-born", "is-died");
 	}
-	markedCells = [];
+	markedCells.clear();
 }
 
 function updatePopulation() {
@@ -405,11 +406,13 @@ function handleResetClick() {
 }
 
 function handleSizeChange() {
+	const newSize = sizeInput.valueAsNumber;
+	const minimumSize = Number(sizeInput.min);
+	const maximumSize = Number(sizeInput.max);
+	if (!Number.isInteger(newSize) || newSize === gridSize || newSize < minimumSize || newSize > maximumSize) return;
+
 	if (runIntervalId !== null) gameStop();
-	const newSize = Number(sizeInput.value);
-	if (newSize >= 1 && newSize <= 100) {
-		rebuildBoard(newSize);
-	}
+	rebuildBoard(newSize);
 }
 
 function updateSizeOutput() {
@@ -425,11 +428,11 @@ function handleSpeedChange() {
 }
 
 function handleBoardClick(event) {
-	if (runIntervalId !== null) gameStop();
-
 	// Event delegation: a single listener handles all cells
 	const pixel = event.target.closest(".pixel");
 	if (!pixel) return; // click on a gap, not on a cell
+
+	if (runIntervalId !== null) gameStop();
 
 	const index = Number(pixel.dataset.index);
 	setCell(index, currentState[index] === 0, false);
