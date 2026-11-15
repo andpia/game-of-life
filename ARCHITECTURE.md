@@ -7,16 +7,18 @@ step, framework, or external runtime dependency.
 ## Files and responsibilities
 
 - `index.html` provides the page structure, controls, statistics, and pattern
-  buttons. The script is loaded with `defer`, so the document is parsed before
-  initialization begins.
+  buttons. It loads both scripts with `defer`, in document order, after parsing.
 - `style.css` defines the visual design, responsive layout, and cell-state
   appearance.
-- `script.js` contains the pattern definitions, simulation state, game rules,
-  DOM updates, and event handlers.
+- `patterns.js` defines the patterns and the helper for converting rows into
+  cell coordinates.
+- `script.js` contains the simulation state, game rules, DOM updates, and event
+  handlers.
 
-The JavaScript is a single browser script rather than a set of modules. This
-keeps the example easy to run directly while separating the main concerns into
-named sections and functions.
+The files are classic browser scripts rather than modules. `patterns.js` runs
+first and defines `PATTERNS` in the shared global scope; `script.js` uses it
+when enabling pattern buttons and placing patterns. Keeping this load order
+allows the page to be opened directly without a local server.
 
 ## Mobile browser support
 
