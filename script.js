@@ -25,6 +25,10 @@ let gridSize = Number(sizeInput.value);
 // Gap between cells (in pixels)
 const GAP_SIZE = 1;
 
+/*
+ * Patterns
+ */
+
 function patternFromRows(rows) {
 	const cells = [];
 
@@ -157,11 +161,15 @@ const PATTERNS = {
  * The grid is stored with a border of permanently dead cells around it,
  * so every cell always has 8 neighbors and no bounds checks are needed.
  */
-let W = gridSize + 2; // width of the padded grid
-let NEIGHBOR_OFFSETS = [-W - 1, -W, -W + 1, -1, 1, W - 1, W, W + 1];
+let paddedWidth = gridSize + 2;
+let NEIGHBOR_OFFSETS = [
+	-paddedWidth - 1, -paddedWidth, -paddedWidth + 1,
+	-1, 1,
+	paddedWidth - 1, paddedWidth, paddedWidth + 1
+];
 
 // Convert (row, column) coordinates (0-based, without border) into an index of the padded grid
-const indexOf = (row, column) => (row + 1) * W + (column + 1);
+const getCellIndex = (row, column) => (row + 1) * paddedWidth + (column + 1);
 
 
 // Interval ID for the simulation loop (null if not running)
@@ -179,19 +187,19 @@ let maxPopulationGeneration = 0;
  * `nextState` receives the next generation before the buffers are swapped.
  * The DOM only reflects the state and is never read to compute the game.
  */
-let currentState = new Uint8Array(W * W);
-let nextState = new Uint8Array(W * W);
-let hasBeenAlive = new Uint8Array(W * W);
+let currentState = new Uint8Array(paddedWidth * paddedWidth);
+let nextState = new Uint8Array(paddedWidth * paddedWidth);
+let hasBeenAlive = new Uint8Array(paddedWidth * paddedWidth);
 let uniqueCellsLived = 0;
 
-let cellElements = new Array(W * W); // Same indexing as the buffers
+let cellElements = new Array(paddedWidth * paddedWidth); // Same indexing as the buffers
 
 // Cells with temporary change classes, cleared before the next generation.
 const markedCells = new Set();
 
 
 /*
- * Setup
+ * Board creation and resizing
  */
 
 function createBoard() {
@@ -205,7 +213,7 @@ function createBoard() {
 
 	for (let row = 0; row < gridSize; row++) {
 		for (let column = 0; column < gridSize; column++) {
-			const index = indexOf(row, column);
+			const index = getCellIndex(row, column);
 			const pixel = document.createElement("div");
 			pixel.className = "pixel";
 			pixel.dataset.index = String(index);
@@ -233,16 +241,24 @@ function rebuildBoard(newSize) {
 	board.replaceChildren();
 
 	gridSize = newSize;
-	W = gridSize + 2;
-	NEIGHBOR_OFFSETS = [-W - 1, -W, -W + 1, -1, 1, W - 1, W, W + 1];
-	currentState = new Uint8Array(W * W);
-	nextState = new Uint8Array(W * W);
-	hasBeenAlive = new Uint8Array(W * W);
+	paddedWidth = gridSize + 2;
+	NEIGHBOR_OFFSETS = [
+		-paddedWidth - 1, -paddedWidth, -paddedWidth + 1,
+		-1, 1,
+		paddedWidth - 1, paddedWidth, paddedWidth + 1
+	];
+	currentState = new Uint8Array(paddedWidth * paddedWidth);
+	nextState = new Uint8Array(paddedWidth * paddedWidth);
+	hasBeenAlive = new Uint8Array(paddedWidth * paddedWidth);
 	uniqueCellsLived = 0;
-	cellElements = new Array(W * W);
+	cellElements = new Array(paddedWidth * paddedWidth);
 
 	createBoard();
 }
+
+/*
+ * Cell updates and statistics
+ */
 
 // Always change a cell through setCell, so state and DOM stay in sync
 function setCell(index, alive, changeMark = true) {
@@ -273,7 +289,7 @@ function clearMarks() {
 	markedCells.clear();
 }
 
-function updatePopulation() {
+function updatePopulationStats() {
 	const population = currentState.reduce((sum, cell) => sum + cell, 0);
 	populationOutput.textContent = population;
 	if (population > maxPopulation) {
@@ -289,17 +305,17 @@ function updatePopulation() {
  * Game controls
  */
 
-function gameStart() {
-	runIntervalId = setInterval(gameStep, Number(speedInput.value));
+function startGame() {
+	runIntervalId = setInterval(stepGame, Number(speedInput.value));
 }
 
-function gameStop() {
+function stopGame() {
 	clearInterval(runIntervalId);
 	runIntervalId = null;
 }
 
 // Advance the simulation by one generation
-function gameStep() {
+function stepGame() {
 	clearMarks();
 
 	const changed = [];
@@ -307,7 +323,7 @@ function gameStep() {
 	// Compute the next generation into `nextState`, reading only from `currentState`.
 	for (let row = 1; row <= gridSize; row++) {
 		for (let column = 1; column <= gridSize; column++) {
-			const index = row * W + column;
+			const index = row * paddedWidth + column;
 
 			let neighbors = 0;
 			for (const offset of NEIGHBOR_OFFSETS) {
@@ -336,17 +352,17 @@ function gameStep() {
 		generationOutput.textContent = generation;
 	} else {
 		// No changes, the simulation has reached a stable state
-		gameStop();
+		stopGame();
 	}
 
-	updatePopulation();
+	updatePopulationStats();
 }
 
 // Clear the board and reset its population statistics.
-function gameReset() {
+function resetGame() {
 	clearMarks();
 
-	for (let index = 0; index < W * W; index++) {
+	for (let index = 0; index < paddedWidth * paddedWidth; index++) {
 		if (currentState[index] === 1) setCell(index, false, false);
 	}
 
@@ -357,8 +373,12 @@ function gameReset() {
 	hasBeenAlive.fill(0);
 	uniqueCellsLived = 0;
 	uniqueCellsLivedOutput.textContent = uniqueCellsLived;
-	updatePopulation();
+	updatePopulationStats();
 }
+
+/*
+ * Pattern placement
+ */
 
 function updatePatternAvailability() {
 	for (const button of patternButtons) {
@@ -368,16 +388,16 @@ function updatePatternAvailability() {
 }
 
 function placePattern(pattern) {
-	if (runIntervalId !== null) gameStop();
-	gameReset();
+	if (runIntervalId !== null) stopGame();
+	resetGame();
 
 	const top = Math.floor((gridSize - pattern.height) / 2);
 	const left = Math.floor((gridSize - pattern.width) / 2);
 	for (const [column, row] of pattern.cells) {
-		setCell(indexOf(top + row, left + column), true, false);
+		setCell(getCellIndex(top + row, left + column), true, false);
 	}
 
-	updatePopulation();
+	updatePopulationStats();
 }
 
 
@@ -387,22 +407,22 @@ function placePattern(pattern) {
 
 function handleStartClick() {
 	if (runIntervalId !== null) return;
-	gameStart();
+	startGame();
 }
 
 function handleStopClick() {
 	if (runIntervalId === null) return;
-	gameStop();
+	stopGame();
 }
 
 function handleStepClick() {
 	if (runIntervalId !== null) return;
-	gameStep();
+	stepGame();
 }
 
 function handleResetClick() {
-	if (runIntervalId !== null) gameStop();
-	gameReset();
+	if (runIntervalId !== null) stopGame();
+	resetGame();
 }
 
 function handleSizeChange() {
@@ -411,7 +431,7 @@ function handleSizeChange() {
 	const maximumSize = Number(sizeInput.max);
 	if (!Number.isInteger(newSize) || newSize === gridSize || newSize < minimumSize || newSize > maximumSize) return;
 
-	if (runIntervalId !== null) gameStop();
+	if (runIntervalId !== null) stopGame();
 	rebuildBoard(newSize);
 }
 
@@ -422,8 +442,8 @@ function updateSizeOutput() {
 function handleSpeedChange() {
 	speedOutput.textContent = `${speedInput.value} ms`;
 	if (runIntervalId !== null) {
-		gameStop();
-		gameStart();
+		stopGame();
+		startGame();
 	}
 }
 
@@ -432,11 +452,11 @@ function handleBoardClick(event) {
 	const pixel = event.target.closest(".pixel");
 	if (!pixel) return; // click on a gap, not on a cell
 
-	if (runIntervalId !== null) gameStop();
+	if (runIntervalId !== null) stopGame();
 
 	const index = Number(pixel.dataset.index);
 	setCell(index, currentState[index] === 0, false);
-	updatePopulation();
+	updatePopulationStats();
 }
 
 

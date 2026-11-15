@@ -39,7 +39,7 @@ flowchart TD
     UI["HTML controls and board"] --> Events["Event handlers"]
     Events --> Actions["Start, stop, step, reset, resize, or place pattern"]
     Actions --> State["Simulation state"]
-    Timer["setInterval timer"] --> Step["gameStep()"]
+    Timer["setInterval timer"] --> Step["stepGame()"]
     Actions --> Step
     Step --> State
     State --> Render["Update changed cells and statistics"]
@@ -51,7 +51,7 @@ flowchart TD
 `gridSize` is the number of playable rows and columns. The implementation uses
 a linear array with a one-cell border around the playable grid:
 
-- `W` is the padded row width (`gridSize + 2`).
+- `paddedWidth` is the padded row width (`gridSize + 2`).
 - `currentState` stores the current generation.
 - `nextState` receives the next generation before the two buffers are swapped.
 - `hasBeenAlive` records which cells have been alive since the most recent
@@ -61,7 +61,7 @@ a linear array with a one-cell border around the playable grid:
 
 Cell values are `0` for dead and `1` for alive. The padded border remains dead,
 so each playable cell can inspect the eight neighboring offsets without
-checking whether it is at an edge. `indexOf(row, column)` converts zero-based
+checking whether it is at an edge. `getCellIndex(row, column)` converts zero-based
 playable coordinates to an index in the padded arrays.
 
 The typed arrays are the source of truth for the game. The DOM is a visual
@@ -71,7 +71,7 @@ when a changed cell needs to be reflected in the DOM.
 
 ## Generation update
 
-`gameStep()` performs one complete generation:
+`stepGame()` performs one complete generation:
 
 1. Clear temporary birth and death highlights from the previous step.
 2. Visit every playable cell and count its live neighbors in `currentState`.
