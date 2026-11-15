@@ -9,20 +9,146 @@ const stepButton = document.querySelector("#step-button");
 const resetButton = document.querySelector("#reset-button");
 const generationOutput = document.querySelector("#generation-output");
 const sizeInput = document.querySelector("#size-input");
+const sizeOutput = document.querySelector("#size-output");
+const speedInput = document.querySelector("#speed-input");
+const speedOutput = document.querySelector("#speed-output");
 const board = document.querySelector("#board");
 const populationOutput = document.querySelector("#population-output");
+const uniqueCellsLivedOutput = document.querySelector("#unique-cells-lived-output");
 const maxPopulationOutput = document.querySelector("#max-population-output");
 const maxPopulationGenerationOutput = document.querySelector("#max-population-generation-output");
+const patternButtons = document.querySelectorAll(".pattern-button");
 
 // Number of cells per row and column (the grid is N x N)
 let gridSize = Number(sizeInput.value);
 
-// Maximum size of each cell and gap between cells (in pixels)
-const PIXEL_SIZE = 10;
+// Gap between cells (in pixels)
 const GAP_SIZE = 1;
 
-// Simulation interval (in milliseconds)
-const TICK_MS = 100;
+function patternFromRows(rows) {
+	const cells = [];
+
+	for (const [rowIndex, row] of rows.entries()) {
+		for (const [column, cell] of [...row].entries()) {
+			if (cell === "O") cells.push([column, rowIndex]);
+		}
+	}
+
+	return { width: rows[0].length, height: rows.length, cells };
+}
+
+const PATTERNS = {
+	glider: {
+		width: 3,
+		height: 3,
+		cells: [[1, 0], [2, 1], [0, 2], [1, 2], [2, 2]]
+	},
+	blinker: {
+		width: 3,
+		height: 1,
+		cells: [[0, 0], [1, 0], [2, 0]]
+	},
+	toad: {
+		width: 4,
+		height: 2,
+		cells: [[1, 0], [2, 0], [3, 0], [0, 1], [1, 1], [2, 1]]
+	},
+	beacon: {
+		width: 4,
+		height: 4,
+		cells: [[0, 0], [1, 0], [0, 1], [1, 1], [2, 2], [3, 2], [2, 3], [3, 3]]
+	},
+	"r-pentomino": {
+		width: 3,
+		height: 3,
+		cells: [[1, 0], [2, 0], [0, 1], [1, 1], [1, 2]]
+	},
+	acorn: {
+		width: 7,
+		height: 3,
+		cells: [[1, 0], [3, 1], [0, 2], [1, 2], [4, 2], [5, 2], [6, 2]]
+	},
+	"lightweight-spaceship": {
+		width: 5,
+		height: 4,
+		cells: [[1, 0], [2, 0], [3, 0], [4, 0], [0, 1], [4, 1], [4, 2], [0, 3], [3, 3], [4, 3]]
+	},
+	block: patternFromRows([
+		"OO",
+		"OO"
+	]),
+	beehive: patternFromRows([
+		".OO.",
+		"O..O",
+		".OO."
+	]),
+	boat: patternFromRows([
+		"OO.",
+		"O.O",
+		".O."
+	]),
+	"middleweight-spaceship": patternFromRows([
+		"...O..",
+		".O...O",
+		"O.....",
+		"O....O",
+		"OOOOO."
+	]),
+	"heavyweight-spaceship": patternFromRows([
+		"...OO..",
+		".O....O",
+		"O......",
+		"O.....O",
+		"OOOOOO."
+	]),
+	tub: patternFromRows([
+		".O.",
+		"O.O",
+		".O."
+	]),
+	loaf: patternFromRows([
+		".OO.",
+		"O..O",
+		".O.O",
+		"..O."
+	]),
+	diehard: patternFromRows([
+		"......O.",
+		"OO......",
+		".O...OOO"
+	]),
+	pentadecathlon: patternFromRows([
+		"..O....O..",
+		"OO.OOOO.OO",
+		"..O....O.."
+	]),
+	pulsar: patternFromRows([
+		"..OOO...OOO..",
+		".............",
+		"O....O.O....O",
+		"O....O.O....O",
+		"O....O.O....O",
+		"..OOO...OOO..",
+		".............",
+		"..OOO...OOO..",
+		"O....O.O....O",
+		"O....O.O....O",
+		"O....O.O....O",
+		".............",
+		"..OOO...OOO.."
+	]),
+	"gosper-glider-gun": patternFromRows([
+		"........................O...........",
+		"......................O.O...........",
+		"............OO......OO............OO",
+		"...........O...O....OO............OO",
+		"OO........O.....O...OO..............",
+		"OO........O...O.OO....O.O...........",
+		"..........O.....O.......O...........",
+		"...........O...O....................",
+		"............OO......................"
+	])
+};
 
 
 /*
@@ -55,6 +181,8 @@ let maxPopulationGeneration = 0;
  */
 let currentState = new Uint8Array(W * W);
 let nextState = new Uint8Array(W * W);
+let hasBeenAlive = new Uint8Array(W * W);
+let uniqueCellsLived = 0;
 
 let cellElements = new Array(W * W); // Same indexing as the buffers
 
@@ -68,7 +196,6 @@ let markedCells = [];
 
 function createBoard() {
 	// Configure the board layout via CSS variables and grid template
-	board.style.setProperty("--board-max-size", `${gridSize * PIXEL_SIZE + (gridSize - 1) * GAP_SIZE}px`);
 	board.style.setProperty("--pixel-gap", `${GAP_SIZE}px`);
 	board.style.gridTemplateColumns = `repeat(${gridSize}, minmax(0, 1fr))`;
 	board.style.gridTemplateRows = `repeat(${gridSize}, minmax(0, 1fr))`;
@@ -92,10 +219,12 @@ function createBoard() {
 	generation = 0;
 	generationOutput.textContent = generation;
 	populationOutput.textContent = 0;
+	uniqueCellsLivedOutput.textContent = uniqueCellsLived;
 	maxPopulation = 0;
 	maxPopulationGeneration = 0;
 	maxPopulationOutput.textContent = maxPopulation;
 	maxPopulationGenerationOutput.textContent = maxPopulationGeneration;
+	updatePatternAvailability();
 }
 
 // Destroy the current board and recreate its state buffers for a new size
@@ -108,6 +237,8 @@ function rebuildBoard(newSize) {
 	NEIGHBOR_OFFSETS = [-W - 1, -W, -W + 1, -1, 1, W - 1, W, W + 1];
 	currentState = new Uint8Array(W * W);
 	nextState = new Uint8Array(W * W);
+	hasBeenAlive = new Uint8Array(W * W);
+	uniqueCellsLived = 0;
 	cellElements = new Array(W * W);
 
 	createBoard();
@@ -116,6 +247,12 @@ function rebuildBoard(newSize) {
 // Always change a cell through setCell, so state and DOM stay in sync
 function setCell(index, alive, changeMark = true) {
 	currentState[index] = alive ? 1 : 0;
+
+	if (alive && hasBeenAlive[index] === 0) {
+		hasBeenAlive[index] = 1;
+		uniqueCellsLived++;
+		uniqueCellsLivedOutput.textContent = uniqueCellsLived;
+	}
 
 	const pixel = cellElements[index];
 	pixel.classList.toggle("is-alive", alive);
@@ -152,7 +289,7 @@ function updatePopulation() {
  */
 
 function gameStart() {
-	runIntervalId = setInterval(gameStep, TICK_MS);
+	runIntervalId = setInterval(gameStep, Number(speedInput.value));
 }
 
 function gameStop() {
@@ -216,6 +353,29 @@ function gameReset() {
 	generationOutput.textContent = generation;
 	maxPopulation = 0;
 	maxPopulationGeneration = 0;
+	hasBeenAlive.fill(0);
+	uniqueCellsLived = 0;
+	uniqueCellsLivedOutput.textContent = uniqueCellsLived;
+	updatePopulation();
+}
+
+function updatePatternAvailability() {
+	for (const button of patternButtons) {
+		const pattern = PATTERNS[button.dataset.pattern];
+		button.disabled = !pattern || pattern.width > gridSize || pattern.height > gridSize;
+	}
+}
+
+function placePattern(pattern) {
+	if (runIntervalId !== null) gameStop();
+	gameReset();
+
+	const top = Math.floor((gridSize - pattern.height) / 2);
+	const left = Math.floor((gridSize - pattern.width) / 2);
+	for (const [column, row] of pattern.cells) {
+		setCell(indexOf(top + row, left + column), true, false);
+	}
+
 	updatePopulation();
 }
 
@@ -252,6 +412,18 @@ function handleSizeChange() {
 	}
 }
 
+function updateSizeOutput() {
+	sizeOutput.textContent = `${sizeInput.value} × ${sizeInput.value}`;
+}
+
+function handleSpeedChange() {
+	speedOutput.textContent = `${speedInput.value} ms`;
+	if (runIntervalId !== null) {
+		gameStop();
+		gameStart();
+	}
+}
+
 function handleBoardClick(event) {
 	if (runIntervalId !== null) gameStop();
 
@@ -269,11 +441,19 @@ function handleBoardClick(event) {
  * Initialize
  */
 createBoard();
+updateSizeOutput();
 
 startButton.addEventListener("click", handleStartClick);
 stopButton.addEventListener("click", handleStopClick);
 stepButton.addEventListener("click", handleStepClick);
 resetButton.addEventListener("click", handleResetClick);
+sizeInput.addEventListener("input", updateSizeOutput);
 sizeInput.addEventListener("change", handleSizeChange);
+speedInput.addEventListener("input", handleSpeedChange);
+for (const button of patternButtons) {
+	button.addEventListener("click", () => {
+		placePattern(PATTERNS[button.dataset.pattern]);
+	});
+}
 
 board.addEventListener("click", handleBoardClick);
