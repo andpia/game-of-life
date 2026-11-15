@@ -31,22 +31,53 @@ mouse or keyboard.
 
 ## Runtime flow
 
-The browser UI sends user actions to event handlers. Those handlers update the
-simulation or its settings, and the script reflects the resulting state in the
-DOM. When the game is running, a timer calls the same generation-step function
-used by the Step button.
+The following diagram shows the main calls and data dependencies, not every
+event or internal operation. Solid arrows indicate calls or timer callbacks;
+dotted arrows indicate reads or updates. In particular, there is no separate
+rendering component: functions such as `setCell`, `createBoard`, and
+`updatePopulationStats` update the DOM directly.
 
 ```mermaid
 flowchart TD
-    UI["HTML controls and board"] --> Events["Event handlers"]
-    Events --> Actions["Start, stop, step, reset, resize, or place pattern"]
-    Actions --> State["Simulation state"]
-    Timer["setInterval timer"] --> Step["stepGame()"]
-    Actions --> Step
-    Step --> State
-    State --> Render["Update changed cells and statistics"]
-    Render --> UI
+    Init["Initialization"] --> Create["createBoard()"]
+    UI["Controls and board"] --> Handlers["Event handlers"]
+    Handlers -->|"Start / Stop"| TimerControl["startGame() / stopGame()"]
+    TimerControl -->|"startGame sets interval"| Timer["Timer"]
+    Timer -->|"callback"| Step["stepGame()"]
+    Handlers -->|"Step, when stopped"| Step
+    Handlers -->|"Reset"| Reset["resetGame()"]
+    Handlers -->|"Grid size change"| Rebuild["rebuildBoard()"]
+    Rebuild --> Create
+    Handlers -->|"Pattern button"| Place["placePattern()"]
+    Handlers -->|"Cell click"| BoardClick["handleBoardClick()"]
+    BoardClick --> Cell["setCell()"]
+    BoardClick --> Stats["updatePopulationStats()"]
+    Place --> Reset
+    Place --> Cell
+    Place --> Stats
+    Reset -->|"live cells"| Cell
+    Reset --> Stats
+    Step -->|"changed cells"| Cell
+    Step --> Stats
+    Step -->|"stable board"| TimerControl
+    Patterns["PATTERNS (patterns.js)"] -.->|"read"| Place
+    Patterns -.->|"read"| Create
+    State["Simulation state"] -.->|"read / update"| Step
+    State -.->|"read / update"| Cell
+    State -.->|"read / update"| Stats
+    Rebuild -.->|"recreate arrays"| State
+    Create -.->|"create board and outputs"| DOM["Board and statistics DOM"]
+    Cell -.->|"update cells and unique count"| DOM
+    Stats -.->|"update population outputs"| DOM
+    Step -.->|"update generation output"| DOM
 ```
+
+`createBoard()` checks pattern availability through `updatePatternAvailability()`.
+For a cell click, `handleBoardClick()` calls `setCell()` first, then
+`updatePopulationStats()`.
+Reset, resize, pattern placement, and cell clicks also stop a running game;
+changing the interval restarts its timer. These conditional stop/restart paths
+are omitted from the diagram to keep it readable.
 
 ## Simulation state
 
