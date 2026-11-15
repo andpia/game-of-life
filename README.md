@@ -37,3 +37,4 @@ whose state changed.
 - `index.html` contains the page structure and controls.
 - `style.css` contains the visual styles and responsive layout.
 - `script.js` contains the pattern data, simulation, and event handlers.
+- `ARCHITECTURE.md` explains the simulation state and runtime flow.
