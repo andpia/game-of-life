@@ -175,8 +175,8 @@ let maxPopulationGeneration = 0;
 /*
  * State
  *
- * `current` is the single source of truth (1 = alive, 0 = dead).
- * `next` is a second buffer used to compute the next generation without allocations.
+ * `currentState` is the single source of truth (1 = alive, 0 = dead).
+ * `nextState` receives the next generation before the buffers are swapped.
  * The DOM only reflects the state and is never read to compute the game.
  */
 let currentState = new Uint8Array(W * W);
@@ -186,7 +186,7 @@ let uniqueCellsLived = 0;
 
 let cellElements = new Array(W * W); // Same indexing as the buffers
 
-// Cells with a temporary change class, cleared before the next manual step.
+// Cells with temporary change classes, cleared before the next generation.
 const markedCells = new Set();
 
 
@@ -304,7 +304,7 @@ function gameStep() {
 
 	const changed = [];
 
-	// Compute the next generation into `next`, reading only from `current`
+	// Compute the next generation into `nextState`, reading only from `currentState`.
 	for (let row = 1; row <= gridSize; row++) {
 		for (let column = 1; column <= gridSize; column++) {
 			const index = row * W + column;
@@ -342,7 +342,7 @@ function gameStep() {
 	updatePopulation();
 }
 
-// Kill every cell
+// Clear the board and reset its population statistics.
 function gameReset() {
 	clearMarks();
 
