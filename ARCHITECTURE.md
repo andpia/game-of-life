@@ -18,6 +18,15 @@ The JavaScript is a single browser script rather than a set of modules. This
 keeps the example easy to run directly while separating the main concerns into
 named sections and functions.
 
+## Mobile browser support
+
+The page includes a device-width viewport setting, and the CSS adapts the
+layout at tablet and phone widths. On narrower screens, the board and controls
+stack vertically, the control panel changes from two columns to one on small
+phones, and the pattern buttons flow into a responsive grid. The controls use
+standard HTML buttons and range inputs, so they work with touch as well as a
+mouse or keyboard.
+
 ## Runtime flow
 
 The browser UI sends user actions to event handlers. Those handlers update the

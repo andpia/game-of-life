@@ -2,7 +2,8 @@
 
 A small, dependency-free implementation of Conway's Game of Life. The project is
 designed to be easy to explore: the interface is plain HTML and CSS, and the
-simulation is implemented in browser JavaScript.
+simulation is implemented in browser JavaScript. The responsive interface is
+designed to work on both desktop and mobile browsers.
 
 ## Run the project
 
